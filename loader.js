@@ -11,13 +11,13 @@ if (fs.existsSync(pluginDir)) {
     files.forEach(file => {
         try {
             const pluginName = path.basename(file, '.js');
-            plugins[pluginName] = require(path.join(__dirname, 'plugins', file));
-            console.log(`✅ Plugin loaded: ${pluginName}`);
+            plugins[pluginName] = require(`./plugins/${file}`);
+            console.log(`✅ Plugin: ${pluginName}`);
         } catch (err) {
-            console.log(`❌ Failed to load ${file}:`, err.message);
+            console.log(`❌ ${file}: ${err.message}`);
         }
     });
 }
 
-console.log(`📦 Total plugins: ${Object.keys(plugins).length}`);
+console.log(`📦 Total: ${Object.keys(plugins).length} plugins`);
 module.exports = plugins;
