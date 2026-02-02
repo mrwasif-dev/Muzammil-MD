@@ -1,46 +1,13 @@
 {
   "name": "Muzammil MD WhatsApp Bot",
-  "description": "Advanced WhatsApp Bot by Muzammil Haqnawaz",
+  "description": "WhatsApp Bot by Muzammil Haqnawaz",
   "repository": "https://github.com/mrwasif-dev/muzammil-md",
-  "logo": "https://i.imgur.com/example.png",
-  "keywords": ["whatsapp", "bot", "multi-device", "baileys", "plugin"],
-  
-  "buildpacks": [
-    {
-      "url": "heroku/nodejs"
-    }
-  ],
-  
+  "keywords": ["whatsapp", "bot", "baileys"],
+  "buildpacks": [{"url": "heroku/nodejs"}],
   "env": {
-    "BOT_NAME": {
-      "description": "Your bot display name",
-      "value": "Muzammil MD",
-      "required": false
-    },
-    
-    "BOT_PREFIX": {
-      "description": "Command prefix (e.g., . , ! , # , /)",
-      "value": ".",
-      "required": false
-    },
-    
-    "BOT_MODE": {
-      "description": "Access mode: 'public' or 'private'",
-      "value": "public",
-      "required": false
-    },
-    
-    "SUDO_NUMBERS": {
-      "description": "Admin numbers (comma separated, optional)",
-      "value": "923053956147,",
-      "required": false
-    }
-  },
-  
-  "formation": {
-    "worker": {
-      "quantity": 1,
-      "size": "basic"
-    }
+    "BOT_NAME": {"value": "Muzammil MD"},
+    "BOT_PREFIX": {"value": "."},
+    "BOT_MODE": {"value": "public"},
+    "SUDO_NUMBERS": {"value": "923053956147"}
   }
 }
