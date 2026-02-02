@@ -1,4 +1,5 @@
 module.exports = {
     name: "Muzammil Haqnawaz",
-    number: "923039107958"
+    number: "923039107958",
+    isOwner: true
 };
