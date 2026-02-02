@@ -1,40 +1,461 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Muzammil MD - WhatsApp Bot</title>
-    <link rel="stylesheet" href="style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muzammil MD • WhatsApp Bot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .bot-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: #667eea;
+            font-size: 22px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .status-card {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid #e6e9ff;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .status-card.active {
+            border-color: #4cd964;
+            background: #f0fff4;
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .status-icon.connected {
+            color: #4cd964;
+        }
+
+        .status-text {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status-subtext {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            font-size: 18px;
+        }
+
+        .qr-container {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            margin-top: 20px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .qr-title {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .qr-instructions {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .info-box {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .info-box .label {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .info-box .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Muzammil MD WhatsApp Bot</h1>
-        
-        <div id="status-box">
-            <h2 id="status">🔄 Connecting...</h2>
-            <div id="sessionStatus"></div>
+        <div class="header">
+            <div class="bot-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h1><i class="fas fa-whatsapp"></i> Muzammil MD</h1>
+            <p>Advanced WhatsApp Bot by Muzammil Haqnawaz</p>
         </div>
-        
-        <div id="qr-container" class="hidden">
-            <h3>📱 Scan QR Code:</h3>
-            <div id="qrcode"></div>
-            <p class="note">Scan with WhatsApp > Linked Devices</p>
+
+        <div class="content">
+            <div class="status-card" id="statusCard">
+                <div class="status-icon" id="statusIcon">
+                    <i class="fas fa-sync-alt pulse"></i>
+                </div>
+                <div class="status-text" id="statusText">Connecting...</div>
+                <div class="status-subtext" id="statusSubtext">Checking session status</div>
+                
+                <button class="btn" id="connectBtn" onclick="showQR()">
+                    <i class="fas fa-qrcode"></i> Scan QR Code
+                </button>
+            </div>
+
+            <div class="qr-container" id="qrContainer">
+                <div class="qr-title"><i class="fas fa-expand-arrows-alt"></i> QR Code</div>
+                <div class="qr-instructions">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Open WhatsApp on your phone</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Tap Menu → Linked Devices</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Tap "Link a Device" and scan QR</div>
+                    </div>
+                </div>
+                <div id="qrcode"></div>
+                <div class="qr-instructions">
+                    The bot will automatically connect after scanning
+                </div>
+                <button class="btn" onclick="hideQR()">
+                    <i class="fas fa-times"></i> Close QR
+                </button>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Bot Mode</div>
+                    <div class="value" id="botMode">Loading...</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Command Prefix</div>
+                    <div class="value" id="botPrefix">.</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Status</div>
+                    <div class="value" id="botStatus">Offline</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Session</div>
+                    <div class="value" id="sessionStatus">Checking</div>
+                </div>
+            </div>
         </div>
-        
-        <div id="connected-container" class="hidden">
-            <h3>✅ Connected!</h3>
-            <p>Bot is now active and running.</p>
-            <p><strong>Session:</strong> <span id="sessionInfo">Active</span></p>
-        </div>
-        
-        <div class="info">
-            <p>Owner: Muzammil Haqnawaz</p>
-            <p>Mode: <span id="botMode">Loading...</span></p>
-            <p>Prefix: <span id="botPrefix">.</span></p>
+
+        <div class="footer">
+            <p>© 2024 Muzammil MD Bot | Owner: Muzammil Haqnawaz</p>
+            <p style="margin-top: 5px; font-size: 12px; opacity: 0.7;">
+                <i class="fas fa-shield-alt"></i> Secure Connection • 
+                <i class="fas fa-bolt"></i> Real-time Updates
+            </p>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/script.js"></script>
+    <script>
+        const socket = io();
+        let currentQR = null;
+        let isConnected = false;
+
+        // Socket events
+        socket.on('connect', () => {
+            updateStatus('🔗 Connected to server', 'Waiting for bot status...', 'fas fa-plug');
+        });
+
+        socket.on('qr', (qrCode) => {
+            currentQR = qrCode;
+            updateStatus('📱 Scan Required', 'New session - Please scan QR code', 'fas fa-qrcode');
+            showQRCode(qrCode);
+        });
+
+        socket.on('connected', (data) => {
+            isConnected = true;
+            updateStatus('✅ Bot Connected', 'Session is active and ready', 'fas fa-check-circle', true);
+            document.getElementById('connectBtn').style.display = 'none';
+            document.getElementById('qrContainer').style.display = 'none';
+            
+            // Update info boxes
+            if(data.botName) {
+                document.getElementById('botMode').textContent = data.mode || 'public';
+                document.getElementById('botPrefix').textContent = data.prefix || '.';
+                document.getElementById('botStatus').textContent = 'Online';
+                document.getElementById('sessionStatus').textContent = 'Active';
+                document.getElementById('sessionStatus').style.color = '#4cd964';
+            }
+        });
+
+        socket.on('sessionStatus', (status) => {
+            document.getElementById('statusSubtext').textContent = status;
+            if(status.includes('Active') || status.includes('Activated')) {
+                updateStatus('✅ Session Active', 'Bot is already connected', 'fas fa-check-circle', true);
+                document.getElementById('connectBtn').style.display = 'none';
+                document.getElementById('botStatus').textContent = 'Online';
+                document.getElementById('sessionStatus').textContent = 'Already Activated';
+                isConnected = true;
+            }
+        });
+
+        socket.on('error', (error) => {
+            updateStatus('❌ Error', error, 'fas fa-exclamation-circle');
+        });
+
+        // Functions
+        function updateStatus(text, subtext, icon, isActive = false) {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusSubtext').textContent = subtext;
+            document.getElementById('statusIcon').innerHTML = `<i class="${icon}"></i>`;
+            
+            if(isActive) {
+                document.getElementById('statusCard').classList.add('active');
+                document.getElementById('statusIcon').classList.add('connected');
+                document.getElementById('statusIcon').classList.remove('pulse');
+            } else {
+                document.getElementById('statusCard').classList.remove('active');
+                document.getElementById('statusIcon').classList.remove('connected');
+                document.getElementById('statusIcon').classList.add('pulse');
+            }
+        }
+
+        function showQR() {
+            if(isConnected) {
+                alert('✅ Bot is already connected! Session is already activated.');
+                return;
+            }
+            
+            if(currentQR) {
+                document.getElementById('qrContainer').style.display = 'block';
+                document.getElementById('connectBtn').style.display = 'none';
+            } else {
+                socket.emit('requestQR');
+                updateStatus('🔄 Generating QR', 'Please wait...', 'fas fa-sync-alt');
+            }
+        }
+
+        function hideQR() {
+            document.getElementById('qrContainer').style.display = 'none';
+            document.getElementById('connectBtn').style.display = 'flex';
+        }
+
+        function showQRCode(qrCode) {
+            document.getElementById('qrcode').innerHTML = '';
+            QRCode.toCanvas(document.getElementById('qrcode'), qrCode, {
+                width: 200,
+                height: 200,
+                margin: 2,
+                color: {
+                    dark: '#667eea',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if(error) console.error('QR Error:', error);
+            });
+        }
+
+        // Request status on load
+        socket.emit('getStatus');
+    </script>
 </body>
 </html>
