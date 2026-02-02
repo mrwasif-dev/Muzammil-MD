@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Muzammil MD - WhatsApp Bot</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Muzammil MD WhatsApp Bot</h1>
+        
+        <div id="status-box">
+            <h2 id="status">🔄 Connecting...</h2>
+            <div id="sessionStatus"></div>
+        </div>
+        
+        <div id="qr-container" class="hidden">
+            <h3>📱 Scan QR Code:</h3>
+            <div id="qrcode"></div>
+            <p class="note">Scan with WhatsApp > Linked Devices</p>
+        </div>
+        
+        <div id="connected-container" class="hidden">
+            <h3>✅ Connected!</h3>
+            <p>Bot is now active and running.</p>
+            <p><strong>Session:</strong> <span id="sessionInfo">Active</span></p>
+        </div>
+        
+        <div class="info">
+            <p>Owner: Muzammil Haqnawaz</p>
+            <p>Mode: <span id="botMode">Loading...</span></p>
+            <p>Prefix: <span id="botPrefix">.</span></p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>
