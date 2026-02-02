@@ -1,0 +1,18 @@
+{
+  "name": "Muzammil MD WhatsApp Bot",
+  "description": "Advanced WhatsApp Bot by Muzammil Haqnawaz",
+  "repository": "https://github.com/MuzammilHaqnawaz/muzammil-md",
+  "logo": "https://i.imgur.com/example.png",
+  "keywords": ["whatsapp", "bot", "multi-device", "baileys", "plugin"],
+  "buildpacks": [{"url": "heroku/nodejs"}],
+  "env": {
+    "BOT_NAME": {"description": "Your bot display name", "value": "", "required": true},
+    "BOT_PREFIX": {"description": "Command prefix", "value": "", "required": true},
+    "BOT_MODE": {"description": "Access mode", "value": "", "required": true},
+    "SUDO_NUMBERS": {"description": "Admin numbers", "value": "", "required": false},
+    "SESSION_PATH": {"description": "Session path", "value": "./auth_info", "required": false},
+    "NOTIFICATION_ENABLED": {"description": "Notifications", "value": "true", "required": false},
+    "ANTI_SPAM": {"description": "Anti-spam", "value": "true", "required": false}
+  },
+  "formation": {"worker": {"quantity": 1, "size": "eco"}}
+}
