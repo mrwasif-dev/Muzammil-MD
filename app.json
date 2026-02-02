@@ -1,13 +1,14 @@
 {
   "name": "Muzammil MD WhatsApp Bot",
-  "description": "WhatsApp Bot by Muzammil Haqnawaz",
+  "description": "Complete WhatsApp Bot with All Features",
   "repository": "https://github.com/mrwasif-dev/muzammil-md",
-  "keywords": ["whatsapp", "bot", "baileys"],
+  "logo": "https://i.imgur.com/example.png",
+  "keywords": ["whatsapp", "bot", "downloader", "ai", "sticker"],
   "buildpacks": [{"url": "heroku/nodejs"}],
   "env": {
     "BOT_NAME": {"value": "Muzammil MD"},
     "BOT_PREFIX": {"value": "."},
-    "BOT_MODE": {"value": "public"},
-    "SUDO_NUMBERS": {"value": "923053956147"}
-  }
+    "BOT_MODE": {"value": "public"}
+  },
+  "formation": {"worker": {"quantity": 1, "size": "basic"}}
 }
