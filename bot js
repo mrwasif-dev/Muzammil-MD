@@ -1,87 +1,112 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const config = require('./config.js');
 const owner = require('./owner.js');
 const plugins = require('./loader.js');
+const express = require('express');
+const http = require('http');
+const socketIO = require('socket.io');
+const path = require('path');
 
-// Helper functions
-function isOwner(number) {
-    return number === owner.personal.number;
-}
+// Express app
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
 
-function isSudo(number) {
-    return config.admin.sudoNumbers.includes(number) || isOwner(number);
-}
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
 
-function canUseBot(number) {
-    if (config.bot.mode === "public") return true;
-    return isSudo(number);
-}
+// Routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/status', (req, res) => {
+    res.json({
+        status: 'running',
+        bot: config.bot.name,
+        owner: owner.personal.name,
+        mode: config.bot.mode
+    });
+});
+
+let sock = null;
+let currentQR = null;
 
 async function startBot() {
-    console.log(`🚀 ${config.bot.name} Bot Starting...`);
+    console.log(`🚀 ${config.bot.name} Starting...`);
     
     const { state, saveCreds } = await useMultiFileAuthState(config.session.savePath);
     
-    const sock = makeWASocket({
+    sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true,
-        browser: ['Ubuntu', 'Chrome', '20.0.04'],
-        version: [2, 2413, 1]
+        printQRInTerminal: false, // Disable terminal QR
+        browser: ['Ubuntu', 'Chrome', '20.0.04']
     });
 
     sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect } = update;
+        const { connection, lastDisconnect, qr } = update;
+        
+        if (qr) {
+            // Send QR to web interface
+            currentQR = qr;
+            io.emit('qr', qr);
+            io.emit('sessionStatus', 'New session - Please scan QR');
+        }
         
         if (connection === 'close') {
-            const reason = new DisconnectReason(lastDisconnect?.error);
-            console.log('Connection closed:', reason);
-            
-            if (reason !== DisconnectReason.loggedOut) {
-                setTimeout(() => startBot(), 5000);
-            }
+            io.emit('sessionStatus', 'Disconnected - Reconnecting...');
+            setTimeout(() => startBot(), 5000);
         } else if (connection === 'open') {
-            console.log(`✅ ${config.bot.name} Connected!`);
-            setInterval(() => sock.sendPresenceUpdate('available'), 60000);
+            console.log('✅ Connected!');
+            io.emit('connected', {
+                botName: config.bot.name,
+                mode: config.bot.mode,
+                prefix: config.bot.prefix
+            });
+            io.emit('sessionStatus', 'Session Active - Already Activated');
+            
+            // Send welcome message to owner
+            const welcomeMsg = `✅ ${config.bot.name} is now active!\nMode: ${config.bot.mode}\nPrefix: ${config.bot.prefix}\nHeroku App: ${process.env.HEROKU_APP_NAME || 'Active'}`;
+            sock.sendMessage(owner.personal.number + '@s.whatsapp.net', { text: welcomeMsg });
         }
     });
 
     sock.ev.on('creds.update', saveCreds);
     
+    // Message handling
     sock.ev.on('messages.upsert', async ({ messages }) => {
         const msg = messages[0];
         if (!msg.message || msg.key.fromMe) return;
         
         const jid = msg.key.remoteJid;
-        const sender = msg.key.participant || jid;
         const text = msg.message.conversation || 
                     msg.message.extendedTextMessage?.text || '';
         
-        // Check permission
-        if (!canUseBot(sender)) {
-            return sock.sendMessage(jid, { text: "❌ Bot is in private mode. Contact owner." });
-        }
-        
-        // Check prefix
         if (text.startsWith(config.bot.prefix)) {
-            const command = text.slice(config.bot.prefix.length).split(' ')[0].toLowerCase();
-            const args = text.trim().split(' ').slice(1);
-            
+            const command = text.slice(config.bot.prefix.length).split(' ')[0];
             if (plugins[command]) {
-                try {
-                    await plugins[command].handler(msg, sock, args);
-                } catch (err) {
-                    console.log('Plugin error:', err);
-                }
+                await plugins[command].handler(msg, sock, text.split(' ').slice(1));
             }
         }
     });
 }
 
-// HTTP server for Heroku
-const PORT = process.env.PORT || 3000;
-require('http').createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(`${config.bot.name} WhatsApp Bot\n`);
-}).listen(PORT);
+// Socket connection
+io.on('connection', (socket) => {
+    console.log('🌐 Web client connected');
+    
+    // Send current status
+    if (currentQR) {
+        socket.emit('qr', currentQR);
+        socket.emit('sessionStatus', 'Waiting for QR scan...');
+    } else {
+        socket.emit('sessionStatus', 'Session Active - Already Activated');
+    }
+});
 
-startBot();
+// Start server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`🌐 Web server: http://localhost:${PORT}`);
+    startBot();
+});
