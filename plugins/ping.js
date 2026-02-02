@@ -1,5 +1,7 @@
 module.exports = {
     name: "ping",
+    category: "general",
+    desc: "Check bot response time",
     handler: async (message, sock, args) => {
         const start = Date.now();
         const jid = message.key.remoteJid;
