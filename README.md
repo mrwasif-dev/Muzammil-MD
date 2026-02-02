@@ -1,18 +1,27 @@
 # Muzammil MD WhatsApp Bot
 
-Advanced WhatsApp Bot with plugin system.
+Advanced WhatsApp Bot with plugin system by Muzammil Haqnawaz
 
 ## Features
 - Multi-device support
-- Plugin system
+- Plugin system (add .js files in plugins/)
 - Public/Private modes
 - Owner & Admin system
-- Heroku deployment
+- Web QR interface
+- Heroku ready
 
-## Deployment
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/MuzammilHaqnawaz/muzammil-md)
+## One-Click Deployment
 
-## Local Setup
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/mrwasif-dev/muzammil-md)
+
+## Manual Deployment
 ```bash
+# Clone repository
+git clone https://github.com/mrwasif-dev/muzammil-md
+cd muzammil-md
+
+# Install dependencies
 npm install
+
+# Start bot
 node bot.js
