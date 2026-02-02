@@ -1,6 +1,4 @@
 node_modules/
 auth_info/
-owner.js
-.env
 *.log
 .DS_Store
