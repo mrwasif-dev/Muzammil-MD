@@ -5,9 +5,6 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "dev": "nodemon bot.js",
-    "heroku-prebuild": "echo Heroku build started",
-    "heroku-postbuild": "echo Build completed",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "engines": {
@@ -16,29 +13,18 @@
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.5.0",
-    "express": "^4.18.0",
-    "socket.io": "^4.7.0",
-    "qrcode": "^1.5.3",
-    "dotenv": "^16.0.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.0"
+    "express": "^4.18.0"
   },
   "keywords": [
     "whatsapp",
     "bot",
     "baileys",
-    "multi-device",
-    "plugin-system"
+    "multi-device"
   ],
   "author": "Muzammil Haqnawaz",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MuzammilHaqnawaz/muzammil-md.git"
-  },
-  "bugs": {
-    "url": "https://github.com/MuzammilHaqnawaz/muzammil-md/issues"
-  },
-  "homepage": "https://github.com/MuzammilHaqnawaz/muzammil-md#readme"
+    "url": "https://github.com/mrwasif-dev/muzammil-md.git"
+  }
 }
