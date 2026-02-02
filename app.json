@@ -1,7 +1,7 @@
 {
   "name": "Muzammil MD WhatsApp Bot",
   "description": "Advanced WhatsApp Bot by Muzammil Haqnawaz",
-  "repository": "https://github.com/MuzammilHaqnawaz/muzammil-md",
+  "repository": "https://github.com/mrwasif-dev/muzammil-md",
   "logo": "https://i.imgur.com/example.png",
   "keywords": ["whatsapp", "bot", "multi-device", "baileys", "plugin"],
   "buildpacks": [{"url": "heroku/nodejs"}],
