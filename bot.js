@@ -3,120 +3,146 @@ const config = require('./config.js');
 const owner = require('./owner.js');
 const plugins = require('./loader.js');
 
-let qrCode = null;
-let isConnected = false;
+console.log('🚀 Muzammil MD Bot Starting...');
 
 async function startBot() {
-    console.log(`🚀 ${config.bot.name} Starting...`);
-    
-    const { state, saveCreds } = await useMultiFileAuthState(config.session.savePath);
-    
-    const sock = makeWASocket({
-        auth: state,
-        // printQRInTerminal ہٹا دیا (deprecated)
-        browser: ['Ubuntu', 'Chrome', '20.0.04'],
-        version: [2, 3000, 1023223821] // Latest version
-    });
+    try {
+        console.log('📁 Loading session...');
+        const { state, saveCreds } = await useMultiFileAuthState('auth_info');
+        
+        console.log('🔗 Connecting to WhatsApp...');
+        const sock = makeWASocket({
+            auth: state,
+            printQRInTerminal: true,
+            browser: ['Chrome', 'Windows', '10.0']
+        });
 
-    sock.ev.on('connection.update', async (update) => {
-        const { connection, qr } = update;
-        
-        // QR کوڈ مل گیا
-        if (qr) {
-            qrCode = qr;
-            console.log('📱 QR Code Received!');
-            console.log('Scan this QR with WhatsApp:');
-            console.log(qr); // QR کوڈ ٹرمنل میں دکھائیں
-        }
-        
-        if (connection === 'close') {
-            console.log('🔌 Disconnected, reconnecting in 10s...');
-            setTimeout(() => startBot(), 10000);
-        } 
-        else if (connection === 'open') {
-            isConnected = true;
-            console.log('✅ Connected to WhatsApp!');
+        sock.ev.on('connection.update', (update) => {
+            const { connection, qr } = update;
             
-            // Notify owner
-            try {
-                await sock.sendMessage(owner.number + '@s.whatsapp.net', {
-                    text: `✅ ${config.bot.name} is now active!\nMode: ${config.bot.mode}\nPrefix: ${config.bot.prefix}\nHeroku App: Running`
-                });
-            } catch (err) {
-                console.log('Owner notification failed:', err.message);
+            if (qr) {
+                console.log('\n=========================================');
+                console.log('📱 SCAN THIS QR CODE WITH WHATSAPP');
+                console.log('=========================================\n');
             }
-        }
-    });
+            
+            if (connection === 'open') {
+                console.log('✅ SUCCESS: Connected to WhatsApp!');
+                
+                // Send message to owner
+                const welcomeMsg = `✅ Muzammil MD Bot is now active!\n\n` +
+                                  `Mode: ${config.bot.mode}\n` +
+                                  `Prefix: ${config.bot.prefix}\n` +
+                                  `Heroku App: Running`;
+                
+                sock.sendMessage(owner.number + '@s.whatsapp.net', { text: welcomeMsg })
+                    .then(() => console.log('📨 Notification sent to owner'))
+                    .catch(e => console.log('⚠️ Could not notify owner:', e.message));
+            }
+            
+            if (connection === 'close') {
+                console.log('🔌 Connection closed, restarting in 5s...');
+                setTimeout(startBot, 5000);
+            }
+        });
 
-    sock.ev.on('creds.update', saveCreds);
-    
-    // Handle messages
-    sock.ev.on('messages.upsert', async ({ messages }) => {
-        try {
+        sock.ev.on('creds.update', saveCreds);
+        
+        // Handle messages
+        sock.ev.on('messages.upsert', ({ messages }) => {
             const msg = messages[0];
             if (!msg.message || msg.key.fromMe) return;
             
-            const jid = msg.key.remoteJid;
-            const sender = msg.key.participant || jid;
             const text = msg.message.conversation || 
                         msg.message.extendedTextMessage?.text || '';
             
-            // Check permission
-            if (config.bot.mode === 'private') {
-                const isAllowed = sender === owner.number || config.sudo.includes(sender);
-                if (!isAllowed) return;
-            }
-            
-            // Check command prefix
             if (text.startsWith(config.bot.prefix)) {
-                const command = text.slice(config.bot.prefix.length).split(' ')[0].toLowerCase();
-                const args = text.trim().split(' ').slice(1);
+                const cmd = text.slice(config.bot.prefix.length).split(' ')[0];
+                const args = text.split(' ').slice(1);
                 
-                if (plugins[command]) {
-                    console.log(`Command: ${command} from ${sender}`);
-                    await plugins[command].handler(msg, sock, args);
+                if (plugins[cmd]) {
+                    console.log(`Command: ${cmd} from ${msg.key.remoteJid}`);
+                    plugins[cmd].handler(msg, sock, args);
                 }
             }
-        } catch (err) {
-            console.log('Message handling error:', err.message);
-        }
-    });
+        });
+        
+    } catch (error) {
+        console.error('❌ Error:', error.message);
+        console.log('🔄 Restarting in 10 seconds...');
+        setTimeout(startBot, 10000);
+    }
 }
 
-// Heroku HTTP server
-const PORT = process.env.PORT || 3000;
-require('http').createServer((req, res) => {
+// Heroku web server
+const http = require('http');
+const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    
-    const html = `
-    <html>
-    <head>
-        <title>Muzammil MD Bot</title>
-        <style>
-            body { font-family: Arial; background: #667eea; color: white; padding: 50px; text-align: center; }
-            .container { max-width: 500px; margin: auto; background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; }
-            h1 { margin-bottom: 20px; }
-            .status { font-size: 18px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; }
-            .qr { margin: 20px 0; padding: 20px; background: white; border-radius: 10px; color: black; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>🤖 Muzammil MD WhatsApp Bot</h1>
-            <div class="status">
-                Status: ${isConnected ? '✅ Connected' : '⏳ Waiting for QR Scan'}
+    res.end(`
+        <html>
+        <head>
+            <title>Muzammil MD Bot</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white; 
+                    margin: 0; 
+                    padding: 0; 
+                    display: flex; 
+                    justify-content: center; 
+                    align-items: center; 
+                    min-height: 100vh; 
+                    text-align: center;
+                }
+                .container { 
+                    background: rgba(255,255,255,0.1); 
+                    padding: 40px; 
+                    border-radius: 20px; 
+                    backdrop-filter: blur(10px);
+                    max-width: 500px;
+                    width: 90%;
+                }
+                h1 { margin-bottom: 10px; }
+                .status { 
+                    background: rgba(0,0,0,0.2); 
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    margin: 20px 0;
+                    font-size: 18px;
+                }
+                .info { margin: 10px 0; opacity: 0.9; }
+                .note { 
+                    margin-top: 25px; 
+                    padding: 15px;
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                    font-size: 14px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🤖 Muzammil MD WhatsApp Bot</h1>
+                <div class="status">🟢 Bot is running on Heroku</div>
+                <div class="info">👑 Owner: Muzammil Haqnawaz</div>
+                <div class="info">🔧 Prefix: ${config.bot.prefix || '.'}</div>
+                <div class="info">🌐 Mode: ${config.bot.mode || 'public'}</div>
+                <div class="note">
+                    <strong>📝 Instructions:</strong><br>
+                    1. Check Heroku logs for QR code<br>
+                    2. Scan with WhatsApp > Linked Devices<br>
+                    3. Bot will auto-connect
+                </div>
             </div>
-            ${qrCode ? `<div class="qr"><strong>QR Code:</strong><br><pre>${qrCode}</pre></div>` : ''}
-            <p>Check Heroku logs for QR code if not shown here</p>
-            <p>Owner: Muzammil Haqnawaz</p>
-        </div>
-    </body>
-    </html>`;
-    
-    res.end(html);
-}).listen(PORT, () => {
-    console.log(`🌐 HTTP Server: http://localhost:${PORT}`);
-    console.log(`📱 Bot: ${config.bot.name}`);
-    console.log(`👑 Owner: ${owner.name}`);
+        </body>
+        </html>
+    `);
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`🌐 Web Server: http://localhost:${PORT}`);
     startBot();
 });
